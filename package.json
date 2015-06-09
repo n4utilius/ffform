@@ -21,7 +21,8 @@
     "include-all": "~0.1.3",
     "rc": "~0.5.0",
     "sails": "~0.11.0",
-    "sails-disk": "~0.10.0"
+    "sails-disk": "~0.10.0",
+    "sails-mongo": "^0.11.2"
   },
   "devDependencies": {
     "mocha": "2.2.4",
@@ -31,13 +32,13 @@
   },
   "scripts": {
     "start": "nodemon -e js,json,md app.js",
-    "test": "nodemon -e js,json,md node_modules/mocha/bin/mocha --recursive --growl"
+    "test": "nodemon -e js,json,md node_modules/mocha/bin/mocha --growl"
   },
   "main": "app.js",
   "repository": {
     "type": "git",
-    "url": "git://github.com/caarloshugo/forms.git"
+    "url": "git://github.com/rodrigo/forms.git"
   },
-  "author": "caarloshugo",
+  "author": "rodrigo",
   "license": ""
 }
