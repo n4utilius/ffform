@@ -34,39 +34,29 @@
         $scope.$broadcast('expandAll');
       };
 
-      var merge = function(A, B){
-        /* Devuelve el objeto resultante de mezclar dos objetos*/
-        for(var k in B) if(!(k in A)) A[k] = B[k];
-        return A;
-      }
-        
       var search_and_add = function(node, tree){
+        /* Si no tiene dependencias (padres), añadelo a 'tree' directamente*/
+
+        if(!node.dependency || !node.dependency.id){
+          tree.push(node); return tree;
+        } 
+
         for(var i in tree){
-          // Si encuentra que hay un rama en el arbol con su mismo id (por que un hijo lo 'aparto'), entonces se mezcla con ella
-          if(node.id == tree[i].id){
-            tree[i] = merge(tree[i], node);
-            break;
-
-          // Si tiene dependencia (o un padre)
-          }else if(node.dependency && node.dependency.id){
-            // si encuentra a su padre
-            if(node.dependency.id == tree[i].id){
-              // añadelo al padre
-              if(tree[i].nodes && tree[i].nodes.length > 0){
-                tree[i].nodes.push(node);
-                break;
-              }else{
-                tree[i].nodes =[node];
-                break;
-              }
+          // si encuentra a su padre añadelo en él
+          if(node.dependency.id == tree[i].id){
+            if(tree[i].nodes.length > 0){
+              tree[i].nodes.push(node); 
+              break;
+            }else{
+              tree[i].nodes =[node]; 
+              break;
             }
-
-            // De lo contrario busca entre los hijos de la rama actual
-            else if(tree[i].nodes && tree[i].nodes.length > 0){
-              tree = aux(node, tree[i].nodes)
-            } 
-
           }
+
+          // De lo contrario busca entre los hijos de la rama actual
+          else if(tree[i].nodes.length > 0){
+            tree[i].nodes = search_and_add(node, tree[i].nodes); 
+          } 
         }
 
         return tree
@@ -76,20 +66,23 @@
         var node = nodes.shift();
         if( tree.length < 1) tree.push(node);
         else tree = search_and_add(node, tree);
-        add_to_tree( nodes, tree );
+        create_tree(nodes, tree);
       }
 
-      var add_to_tree = function(nodes, tree){
-        // si no hay más nodos, devuelve el arbol
-        if(nodes.length < 1) return tree;
-        add_to_branch(nodes, tree);
+      var create_tree = function(nodes, tree){
+        if(nodes.length > 0) add_to_branch(nodes, tree);
+        return tree;
       }
 
       $http.get('http://localhost:1337/question').success(function(data) {
-        var tree = add_to_tree(data, []);
-        console.log(tree);
+        /* Tiene que ordenarse para agregar correctamente a los elementos padre*/
+        data = data.sort( function(a, b) { return a.order_num - b.order_num; })
 
-        
+        // Agregar a todos el campo nodes
+        for (var i in data) data[i].nodes = []
+          
+        $scope.data = create_tree( data, [] );
+
       });
 
     }]);
